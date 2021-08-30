@@ -1,0 +1,27 @@
+{
+  "name": "TwitchcardsServer",
+  "version": "1.0.0",
+  "description": "Backend for Twitch cards.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukePercy/TwitchcardsServer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LukePercy/TwitchcardsServer/issues"
+  },
+  "homepage": "https://github.com/LukePercy/TwitchcardsServer#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "passport": "^0.4.1",
+    "passport-auth": "^0.1.4"
+  }
+}
