@@ -1,4 +1,15 @@
 const express = require('express');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db-connect');
+
+// Load env vars
+dotenv.config({ path: './config/config.env' });
+
+// Connect to database;
+connectDB();
+
+// Route files
+const viewer = require('./routes/viewers');
 
 const PORT = process.env.PORT || 3003;
 
@@ -8,12 +19,25 @@ const app = express();
 // requests in our route handlers (as req.body)
 app.use(express.json());
 
-app.get('/api/test', (req, res) => {
-  res.status(200).send(`<h1>This is the backend server</h1>`);
-});
+// Mount routes
+app.use('/api/viewers', viewer);
 
-app.listen(PORT);
-console.log(`The node server is listening port: ${PORT}`);
+// Listen the server
+const server = app.listen(
+  PORT,
+  console.log(
+    `The server is running in ${process.env.NODE_ENV} mode on port ${PORT} 🚀🚀🚀`
+  )
+);
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (error, promise) => {
+  console.log(`[Error]: ${error.message}`);
+
+  // Close the server and exit the process
+  // if there is any error caught
+  server.close(() => process.exit(1));
+});
 
 /**
  * Example below copied from
