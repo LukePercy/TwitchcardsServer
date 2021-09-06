@@ -1,5 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const cors = require('cors');
 const connectDB = require('./config/db-connect');
 
 // Load env vars
@@ -18,6 +19,13 @@ const app = express();
 // This allows us to access the body of POST/PUT
 // requests in our route handlers (as req.body)
 app.use(express.json());
+
+// Bypass the CORS error
+app.use(
+  cors({
+    origin: '*',
+  })
+);
 
 // Mount routes
 app.use('/api/viewers', viewer);
