@@ -21,14 +21,49 @@ router.get('/', async (req, res, next) => {
 // Get a single viewer by ID
 router.get('/:id', async (req, res) => {
   try {
-    const viewer = await Viewer.find({ viewerId: req.params.id });
+    const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
-    if (!viewer.length) {
+    if (!viewer) {
       return res.status(400).json({
         success: false,
         msg: 'The querying viewer not found.',
       });
     }
+
+    res.status(200).json({
+      success: true,
+      data: viewer,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+    });
+  }
+});
+
+// Update a single viewer by ID
+router.put('/:id', async (req, res) => {
+  try {
+    const { cardId, updateAmount } = req.body;
+
+    const viewer = await Viewer.findOne({ viewerId: req.params.id });
+
+    if (!viewer) {
+      return res.status(400).json({
+        success: false,
+        msg: 'The updating viewer not found.',
+      });
+    }
+
+    viewer.holdingCards.forEach((card) => {
+      if (card.cardId === cardId) {
+        card.holdingAmount += updateAmount;
+      }
+    });
+
+    viewer.updatedAt = new Date().toISOString();
+
+    viewer.save();
 
     res.status(200).json({
       success: true,
@@ -55,24 +90,4 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Delete a single viewer by ID
-router.delete('/:id', async (req, res) => {
-  try {
-    const deleteViewer = await Viewer.deleteOne({ viewerId: req.params.id });
-
-    if (!deleteViewer.length) {
-      return res.status(400).json({
-        success: false,
-        msg: 'The deleting viewer not found.',
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: {},
-    });
-  } catch (error) {
-    res.status(400).json({ success: false });
-  }
-});
 module.exports = router;
