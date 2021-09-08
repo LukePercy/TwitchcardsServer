@@ -55,8 +55,8 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    const { holdingCards } = viewer;
     let targetedCardIndex = 0;
+    const { holdingCards } = viewer;
     // Find the card whose ID matched
     const targetedCard = holdingCards.find((card, index) => {
       if (card.cardId === cardId) {
@@ -64,26 +64,22 @@ router.put('/:id', async (req, res) => {
         return card;
       }
     });
-
     // If the card ID doesn't exist
     // create a new card object
-    if (!Object.keys(targetedCard).length) {
-      const updateHoldingCards = [
-        ...holdingCards,
-        {
-          cardId,
-          cardName,
-          holdingAmount: updateAmount,
-        },
-      ];
-      holdingCards = updateHoldingCards;
+    if (!targetedCard) {
+      const updateHoldingCard = {
+        cardId,
+        cardName,
+        holdingAmount: updateAmount,
+      };
+      holdingCards.push(updateHoldingCard);
+    } else {
+      // If the card ID exists,
+      // update the card holding amount
+      holdingCards[targetedCardIndex].holdingAmount =
+        targetedCard.holdingAmount + updateAmount;
     }
-    // If the card ID exists,
-    // update the card holding amount
-    holdingCards[targetedCardIndex] = {
-      ...targetedCard,
-      holdingAmount: updateAmount,
-    };
+
     // update the update time
     viewer.updatedAt = new Date().toISOString();
     // save the changes to db
