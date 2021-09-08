@@ -44,7 +44,7 @@ router.get('/:id', async (req, res) => {
 // Update a single viewer by ID
 router.put('/:id', async (req, res) => {
   try {
-    const { cardId, updateAmount } = req.body;
+    const { cardId, cardName, updateAmount } = req.body;
 
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
@@ -55,14 +55,38 @@ router.put('/:id', async (req, res) => {
       });
     }
 
-    viewer.holdingCards.forEach((card) => {
+    const { holdingCards } = viewer;
+    let targetedCardIndex = 0;
+    // Find the card whose ID matched
+    const targetedCard = holdingCards.find((card, index) => {
       if (card.cardId === cardId) {
-        card.holdingAmount += updateAmount;
+        targetedCardIndex = index;
+        return card;
       }
     });
 
+    // If the card ID doesn't exist
+    // create a new card object
+    if (!Object.keys(targetedCard).length) {
+      const updateHoldingCards = [
+        ...holdingCards,
+        {
+          cardId,
+          cardName,
+          holdingAmount: updateAmount,
+        },
+      ];
+      holdingCards = updateHoldingCards;
+    }
+    // If the card ID exists,
+    // update the card holding amount
+    holdingCards[targetedCardIndex] = {
+      ...targetedCard,
+      holdingAmount: updateAmount,
+    };
+    // update the update time
     viewer.updatedAt = new Date().toISOString();
-
+    // save the changes to db
     viewer.save();
 
     res.status(200).json({
