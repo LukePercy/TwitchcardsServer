@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Viewer = require('../models/Viewer');
 
-// Get all viewers
-router.get('/', async (req, res, next) => {
+// Get all viewers - testing purpose
+router.get('/', async (req, res) => {
   try {
     const viewers = await Viewer.find();
 
@@ -14,6 +14,7 @@ router.get('/', async (req, res, next) => {
   } catch (error) {
     res.status(400).json({
       success: false,
+      msg: error.message,
     });
   }
 });
@@ -37,6 +38,7 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
+      msg: error.message,
     });
   }
 });
@@ -45,7 +47,6 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { cardId, cardName, updateAmount } = req.body;
-
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
@@ -80,7 +81,7 @@ router.put('/:id', async (req, res) => {
         targetedCard.holdingAmount + updateAmount;
     }
 
-    // update the update time
+    // update the updated time
     viewer.updatedAt = new Date().toISOString();
     // save the changes to db
     viewer.save();
@@ -92,6 +93,7 @@ router.put('/:id', async (req, res) => {
   } catch (error) {
     res.status(400).json({
       success: false,
+      msg: error.message,
     });
   }
 });
@@ -106,7 +108,10 @@ router.post('/', async (req, res) => {
       data: newViewer,
     });
   } catch (error) {
-    res.status(400).json({ success: false });
+    res.status(400).json({
+      success: false,
+      msg: error.message,
+    });
   }
 });
 

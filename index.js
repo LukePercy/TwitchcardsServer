@@ -19,6 +19,7 @@ const app = express();
 // This allows us to access the body of POST/PUT
 // requests in our route handlers (as req.body)
 app.use(express.json());
+app.use(express.urlencoded());
 
 // Bypass the CORS error
 app.use(
