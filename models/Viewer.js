@@ -16,6 +16,8 @@ const ViewerSchema = new mongoose.Schema({
     type: String,
   },
   holdingCards: [CardSchema],
+  jwtToken: String,
+  jwtTokenExpire: Number,
   createdAt: {
     type: Date,
     default: Date.now,

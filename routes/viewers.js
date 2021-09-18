@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Viewer = require('../models/Viewer');
+const authMiddleware = require('../middleware/auth');
 
 // Get all viewers - testing purpose
 router.get('/', async (req, res) => {
@@ -44,7 +45,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update a single viewer by ID
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { cardId, cardName, updateAmount } = req.body;
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
@@ -99,7 +100,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Create a new viewer
-router.post('/', async (req, res) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const newViewer = await Viewer.create(req.body);
 
