@@ -2,7 +2,6 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db-connect');
-const ComfyJS = require('comfy.js');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -12,7 +11,6 @@ connectDB();
 
 // Route files
 const viewer = require('./routes/viewers');
-const auth = require('./routes/auth');
 
 const PORT = process.env.PORT || 3003;
 
@@ -32,17 +30,6 @@ app.use(
 
 // Mount routes
 app.use('/api/viewers', viewer);
-app.use('/api/auth', auth);
-ComfyJS.Init(process.env.TWITCH_USER, process.env.TWITCH_OAUTH);
-
-// ComfyJS.onCommand = (user, command, message, flags, extra) => {
-//   if (command === 'test') {
-//     console.log('!test was typed in chat');
-//   }
-// };
-ComfyJS.onChat = (user, message, flags, self, extra) => {
-  console.log(user, message);
-};
 
 // Listen the server
 const server = app.listen(
