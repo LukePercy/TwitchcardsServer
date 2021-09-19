@@ -4,20 +4,23 @@ const Viewer = require('../models/Viewer');
 const authMiddleware = async (req, res, next) => {
   let token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startWith('Bearer')
-  ) {
-    token = req.headers.authorization;
+  if (req.headers.authentication) {
+    token = req.headers.authentication;
   }
 
   if (!token) {
-    return next(new ErrorResponse('Not authorize to access this route'), 401);
+    return next(
+      res.status(401).json({
+        success: false,
+        msg: error.message,
+      })
+    );
   }
 
   try {
     //Verify token
     const secret = Buffer.from(process.env.JWT_SECRET, 'base64');
+
     const decode = jwt.verify(token, secret);
 
     console.log(`decode`, decode);
@@ -26,7 +29,12 @@ const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return next(new ErrorResponse('Not authorize to access this route'), 401);
+    return next(
+      res.status(401).json({
+        success: false,
+        msg: error.message,
+      })
+    );
   }
 };
 
