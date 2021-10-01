@@ -24,9 +24,9 @@ app.use(express.urlencoded());
 // Bypass the CORS error
 app.use(
   cors({
-    origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv', 'http://localhost'],
+    origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv']
   })
-);
+  );
 
 // Mount routes
 app.use('/api/viewers', viewer);
