@@ -24,7 +24,7 @@ app.use(express.urlencoded());
 // Bypass the CORS error
 app.use(
   cors({
-    origin:false,
+    origin: [/ext-twitch\.tv$/, 'http://localhost'],
     methods: ['GET','HEAD','PUT','POST']
   })
 );
