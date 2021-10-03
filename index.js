@@ -21,15 +21,44 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
 
-// Bypass the CORS error
-app.use(
-  cors({
-    methods: ['GET', 'PUT', 'POST'],
-    origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv', /twitch\.tv$/]
-  })
-  );
 
-app.options('*', cors());
+app.use(function(req, res, next) {
+  let oneof = false;
+  console.log(`req.headers ==>`, req.headers)
+  if(req.headers.origin) {
+      res.header('Access-Control-Allow-Origin', req.headers.origin);
+      oneof = true;
+  }
+  if(req.headers['access-control-request-method']) {
+      res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
+      oneof = true;
+  }
+  if(req.headers['access-control-request-headers']) {
+      res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+      oneof = true;
+  }
+  if(oneof) {
+      res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
+  }
+
+  // intercept OPTIONS method
+  if (oneof && req.method == 'OPTIONS') {
+      res.send(200);
+  }
+  else {
+      next();
+  }
+});
+
+// Bypass the CORS error
+// app.use(
+//   cors({
+//     methods: ['GET', 'PUT', 'POST'],
+//     origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv', /twitch\.tv$/]
+//   })
+// );
+
+// app.options('*', cors());
 
 // Mount routes
 app.use('/api/viewers', viewer);

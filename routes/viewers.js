@@ -27,7 +27,7 @@ router.get('/:id', async (req, res, next) => {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-        res.status(400).json({
+        res.json({
         success: false,
         msg: 'The querying viewer not found.',
       });
@@ -54,7 +54,7 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-        res.status(400).json({
+        res.json({
         success: false,
         msg: 'The updating viewer not found.',
       });
