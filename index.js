@@ -29,6 +29,8 @@ app.use(
   })
   );
 
+app.options('*', cors());
+
 // Mount routes
 app.use('/api/viewers', viewer);
 

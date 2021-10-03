@@ -4,7 +4,7 @@ const Viewer = require('../models/Viewer');
 const authMiddleware = require('../middleware/auth');
 
 // Get all viewers - testing purpose
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const viewers = await Viewer.find();
 
@@ -12,6 +12,7 @@ router.get('/', async (req, res) => {
       success: true,
       data: viewers,
     });
+    next();
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -37,6 +38,7 @@ router.get('/:id', async (req, res, next) => {
       success: true,
       data: viewer,
     });
+    next();
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -46,16 +48,17 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // Update a single viewer by ID
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res, next) => {
   try {
     const { cardId, cardName, updateAmount } = req.body;
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-      return res.status(400).json({
+        res.status(400).json({
         success: false,
         msg: 'The updating viewer not found.',
       });
+      next();
     }
 
     let targetedCardIndex = 0;
@@ -92,6 +95,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
       success: true,
       data: viewer,
     });
+    next();
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -101,7 +105,7 @@ router.put('/:id', authMiddleware, async (req, res) => {
 });
 
 // Create a new viewer
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, async (req, res, next) => {
   try {
     const newViewer = await Viewer.create(req.body);
 
@@ -109,6 +113,7 @@ router.post('/', authMiddleware, async (req, res) => {
       success: true,
       data: newViewer,
     });
+    next();
   } catch (error) {
     res.status(400).json({
       success: false,
