@@ -22,41 +22,48 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 
-app.use(function(req, res, next) {
-  let oneof = false;
-  console.log(`req.headers ==>`, req.headers)
-  if(req.headers.origin) {
-      res.header('Access-Control-Allow-Origin', req.headers.origin);
-      oneof = true;
-  }
-  if(req.headers['access-control-request-method']) {
-      res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
-      oneof = true;
-  }
-  if(req.headers['access-control-request-headers']) {
-      res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
-      oneof = true;
-  }
-  if(oneof) {
-      res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
-  }
+// app.use(function(req, res, next) {
+//   let oneof = false;
+//   console.log(`req.headers ==>`, req.headers)
+//   if(req.headers.origin) {
+//     console.log('origin added')
+//       res.header('Access-Control-Allow-Origin', req.headers.origin);
+//       oneof = true;
+//   }
+//   if(req.headers['access-control-request-method']) {
+//     console.log('method added')
+//       res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
+//       oneof = true;
+//   }
+//   if(req.headers['access-control-request-headers']) {
+//     console.log('request header added')
+//       res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+//       oneof = true;
+//   }
+//   if(oneof) {
+//     console.log(oneof)
+//       res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
+//   }
+//  console.log('final oneof',oneof)
 
-  // intercept OPTIONS method
-  if (oneof && req.method == 'OPTIONS') {
-      res.send(200);
-  }
-  else {
-      next();
-  }
-});
+//   // intercept OPTIONS method
+//   if (oneof) {
+//     console.log(`before response`)
+//     return res.send(200);
+//   }
+//   else {
+//     console.log(`after response`)
+//       next();
+//   }
+// });
 
 // Bypass the CORS error
-// app.use(
-//   cors({
-//     methods: ['GET', 'PUT', 'POST'],
-//     origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv', /twitch\.tv$/]
-//   })
-// );
+app.use(
+  cors({
+    methods: ['GET', 'PUT', 'POST'],
+    origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv', /twitch\.tv$/]
+  })
+);
 
 // app.options('*', cors());
 

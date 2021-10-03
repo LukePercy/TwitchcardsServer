@@ -8,11 +8,10 @@ router.get('/', async (req, res, next) => {
   try {
     const viewers = await Viewer.find();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: viewers,
     });
-    next();
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -27,14 +26,13 @@ router.get('/:id', async (req, res, next) => {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-        res.json({
+      res.json({
         success: false,
         msg: 'The querying viewer not found.',
       });
-      next();
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: viewer,
     });
@@ -57,7 +55,6 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
         success: false,
         msg: 'The updating viewer not found.',
       });
-      next();
     }
 
     let targetedCardIndex = 0;
@@ -90,7 +87,7 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
     // save the changes to db
     viewer.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: viewer,
     });
@@ -107,7 +104,7 @@ router.post('/', authMiddleware, async (req, res, next) => {
   try {
     const newViewer = await Viewer.create(req.body);
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: newViewer,
     });
