@@ -21,15 +21,16 @@ router.get('/', async (req, res) => {
 });
 
 // Get a single viewer by ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-      return res.status(400).json({
+        res.status(400).json({
         success: false,
         msg: 'The querying viewer not found.',
       });
+      next();
     }
 
     res.status(200).json({
