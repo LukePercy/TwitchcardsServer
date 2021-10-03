@@ -38,7 +38,6 @@ router.get('/:id', async (req, res, next) => {
       success: true,
       data: viewer,
     });
-    next();
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -95,7 +94,6 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
       success: true,
       data: viewer,
     });
-    next();
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -113,7 +111,6 @@ router.post('/', authMiddleware, async (req, res, next) => {
       success: true,
       data: newViewer,
     });
-    next();
   } catch (error) {
     res.status(400).json({
       success: false,
