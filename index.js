@@ -61,11 +61,11 @@ app.use(express.urlencoded());
 app.use(
   cors({
     methods: ['GET', 'PUT', 'POST'],
-    origin: ['https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv', /twitch\.tv$/]
+    origin: '*',
   })
 );
 
-// app.options('*', cors());
+app.options('*', cors());
 
 // Mount routes
 app.use('/api/viewers', viewer);
