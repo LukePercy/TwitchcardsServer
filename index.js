@@ -59,12 +59,16 @@ app.use(express.urlencoded());
 
 // Bypass the CORS error
 const corsOptions = {
-  origin:'*', 
-  credentials:true,            //access-control-allow-credentials:true
-  optionSuccessStatus:200,
-}
+  origin: (origin, callback) => {
+    callback(null, true);
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  credentials: true
+};
 
-app.use(cors(corsOptions))
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 // Mount routes
 app.use('/api/viewers', viewer);
