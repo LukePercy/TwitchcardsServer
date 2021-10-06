@@ -4,6 +4,14 @@ const Viewer = require('../models/Viewer');
 const authMiddleware = require('../middleware/auth');
 const cors = require('cors');
 
+const corsOptions = {
+  origin: (origin, callback) => {
+    callback(null, true);
+  },
+  methods: ["POST", "PUT"],
+  allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+};
+
 // Get all viewers - testing purpose
 router.get('/', async (req, res, next) => {
   try {
@@ -22,7 +30,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // Get a single viewer by ID
-router.get('/:id', async (req, res, next) => {
+router.get('/:id', async (req, res) => {
   try {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
@@ -45,8 +53,10 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
+router.options('/:id', cors(corsOptions));
+
 // Update a single viewer by ID
-router.put('/:id', [authMiddleware, cors()], async (req, res) => {
+router.put('/:id', [authMiddleware, cors(corsOptions)], async (req, res) => {
   try {
     const { cardId, cardName, updateAmount } = req.body;
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
@@ -100,8 +110,10 @@ router.put('/:id', [authMiddleware, cors()], async (req, res) => {
   }
 });
 
+router.options('/', cors(corsOptions));
+
 // Create a new viewer
-router.post('/', [authMiddleware, cors()], async (req, res, next) => {
+router.post('/', [authMiddleware, cors(corsOptions)], async (req, res, next) => {
   try {
     const newViewer = await Viewer.create(req.body);
 
