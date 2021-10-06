@@ -58,14 +58,13 @@ app.use(express.urlencoded());
 // });
 
 // Bypass the CORS error
-app.use(
-  cors({
-    methods: ['GET', 'PUT', 'POST'],
-    origin: 'https://42xd9tib4hce93bavmhmseapyp7fwj.ext-twitch.tv'
-  })
-);
+const corsOptions = {
+  origin:'*', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200,
+}
 
-app.options('*', cors());
+app.use(cors(corsOptions))
 
 // Mount routes
 app.use('/api/viewers', viewer);
