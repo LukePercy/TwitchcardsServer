@@ -58,19 +58,19 @@ app.use(express.urlencoded());
 // });
 
 // Bypass the CORS error
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     callback(null, true);
-//   },
-//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-//   allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-//   credentials: true
-// };
+const corsOptions = {
+  origin: (origin, callback) => {
+    callback(null, true);
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+  allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  // credentials: true
+};
 
-// app.options('*', cors(corsOptions));
-// app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
-app.use(cors());
+// app.use(cors());
 
 // Mount routes
 app.use('/api/viewers', viewer);

@@ -26,7 +26,7 @@ router.get('/:id', async (req, res, next) => {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-      res.send({
+      res.status(200).json({
         success: false,
         msg: 'The querying viewer not found.',
       });
