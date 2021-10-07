@@ -1,6 +1,6 @@
 const express = require('express');
 const dotenv = require('dotenv');
-// const cors = require('cors');
+const cors = require('cors');
 const connectDB = require('./config/db-connect');
 
 // Load env vars
@@ -58,17 +58,17 @@ app.use(express.urlencoded());
 // });
 
 // Bypass the CORS error
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     callback(null, true);
-//   },
-//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-//   allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-//   // credentials: true
-// };
+const corsOptions = {
+  origin: (origin, callback) => {
+    callback(null, true);
+  },
+  methods: ["GET", "POST", "PUT"],
+  allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  // credentials: true
+};
 
-// app.options('*', cors(corsOptions));
-// app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
+app.use(cors(corsOptions));
 
 // app.use(cors());
 

@@ -2,18 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Viewer = require('../models/Viewer');
 const authMiddleware = require('../middleware/auth');
-const cors = require('cors');
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    callback(null, true);
-  },
-  methods: ["POST", "PUT"],
-  allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
-};
 
 // Get all viewers - testing purpose
-router.get('/', async (req, res, next) => {
+router.get('/', async (req, res) => {
   try {
     const viewers = await Viewer.find();
 
@@ -53,19 +44,18 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.options('/:id', cors(corsOptions));
-
 // Update a single viewer by ID
-router.put('/:id', [authMiddleware, cors(corsOptions)], async (req, res) => {
+router.put('/:id',authMiddleware, async (req, res) => {
   try {
     const { cardId, cardName, updateAmount } = req.body;
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
     if (!viewer) {
-        res.json({
-        success: false,
-        msg: 'The updating viewer not found.',
-      });
+      //   res.json({
+      //   success: false,
+      //   msg: 'The updating viewer not found.',
+      // });
+      console.log(`No viewer found`)
     }
 
     let targetedCardIndex = 0;
@@ -110,10 +100,8 @@ router.put('/:id', [authMiddleware, cors(corsOptions)], async (req, res) => {
   }
 });
 
-router.options('/', cors(corsOptions));
-
 // Create a new viewer
-router.post('/', [authMiddleware, cors(corsOptions)], async (req, res, next) => {
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const newViewer = await Viewer.create(req.body);
 
