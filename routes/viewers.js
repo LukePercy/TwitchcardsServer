@@ -25,8 +25,12 @@ router.get('/:id', async (req, res) => {
   try {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
+    if (req.method === 'OPTION') {
+      res.send(200);
+    }
+
     if (!viewer) {
-      return res.status(200).json({
+      return res.json({
         success: false,
         msg: 'The querying viewer not found.',
       });
@@ -45,7 +49,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Update a single viewer by ID
-router.put('/:id',authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, async (req, res) => {
   try {
     const { cardId, cardName, updateAmount } = req.body;
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
@@ -55,7 +59,7 @@ router.put('/:id',authMiddleware, async (req, res) => {
       //   success: false,
       //   msg: 'The updating viewer not found.',
       // });
-      console.log(`No viewer found`)
+      console.log(`No viewer found`);
     }
 
     let targetedCardIndex = 0;
