@@ -2,6 +2,9 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db-connect');
+const ComfyJS = require('comfy.js');
+const slides = require('./cardList/CardList');
+const Viewer = require('./models/Viewer');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -22,41 +25,6 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 
-// app.use(function(req, res, next) {
-//   let oneof = false;
-//   console.log(`req.headers ==>`, req.headers)
-//   if(req.headers.origin) {
-//     console.log('origin added')
-//       res.header('Access-Control-Allow-Origin', req.headers.origin);
-//       oneof = true;
-//   }
-//   if(req.headers['access-control-request-method']) {
-//     console.log('method added')
-//       res.header('Access-Control-Allow-Methods', req.headers['access-control-request-method']);
-//       oneof = true;
-//   }
-//   if(req.headers['access-control-request-headers']) {
-//     console.log('request header added')
-//       res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
-//       oneof = true;
-//   }
-//   if(oneof) {
-//     console.log(oneof)
-//       res.header('Access-Control-Max-Age', 60 * 60 * 24 * 365);
-//   }
-//  console.log('final oneof',oneof)
-
-//   // intercept OPTIONS method
-//   if (oneof) {
-//     console.log(`before response`)
-//     return res.send(200);
-//   }
-//   else {
-//     console.log(`after response`)
-//       next();
-//   }
-// });
-
 // Bypass the CORS error
 const corsOptions = {
   origin: (origin, callback) => {
@@ -74,6 +42,92 @@ app.use(cors(corsOptions));
 
 // Mount routes
 app.use('/api/viewers', viewer);
+
+//comfy
+const channel = process.env.TWITCH_USER;
+const clientId =  process.env.CLIENTID;
+const twitchAuth = process.env.TWITCH_OAUTH;
+
+  // On command API - to add the custom reward
+  ComfyJS.onCommand = async (user, command, message, flags, extra) => {
+  if (command === 'cardrewardcreate') {
+    let customReward = await ComfyJS.CreateChannelReward(clientId, {
+      title: 'Unlock Trading Card',
+      prompt: 'Unlock a random Getting Dicey Trading Card and check your collection panel below the stream',
+      cost: 250,
+      is_enabled: true,
+      background_color: '#00E5CB',
+      is_user_input_required: false,
+      is_max_per_stream_enabled: false,
+      max_per_stream: 0,
+      is_max_per_user_per_stream_enabled: false,
+      max_per_user_per_stream: 0,
+      is_global_cooldown_enabled: true,
+      global_cooldown_seconds: 10,
+      should_redemptions_skip_request_queue: true,
+    });
+    if (customReward) {
+    ComfyJS.Say(`Trading Card Reward Created!`);
+    }
+  }
+};
+
+ComfyJS.onReward = async (user, reward, cost, message, extra) => {
+  const { rewardFulfilled, userId, username } = extra;
+  let randomCard = slides[Math.floor(Math.random() * slides.length)];
+  let response = false;
+  let updateAmount = 1;
+
+  if (rewardFulfilled) {
+    const viewer = await Viewer.findOne({ viewerId: userId });
+    // Check if the viewer has been stored in db already
+    // If true, then update the amount of holding cards for the viewer
+    if (viewer) {
+      let targetedCardIndex = 0;
+      const { holdingCards } = viewer;
+      
+      // Find the card whose ID matched
+      const targetedCard = holdingCards.find((card, index) => {
+        if (card.cardId === randomCard.id) {
+          targetedCardIndex = index;
+          return card;
+        }
+      }
+      )
+      if (!targetedCard) {
+        const updateHoldingCard = {
+          cardId,
+          cardName,
+          holdingAmount: updateAmount,
+        };
+        holdingCards.push(updateHoldingCard);
+      } else {
+        // If the card ID exists,
+        // update the card holding amount
+        holdingCards[targetedCardIndex].holdingAmount =
+        targetedCard.holdingAmount + updateAmount;
+      }
+      // update the updated time
+      viewer.updatedAt = new Date().toISOString();
+      // save the changes to db
+      response = viewer.save();      
+    } else {
+      response = await Viewer.create({
+        viewerId: userId,
+        viewerName: username,
+        holdingCards: [{
+          cardId: randomCard.id,
+          cardName: randomCard.title,
+          holdingAmount: 1}],
+      });
+    }
+  }
+  if (response) {
+    ComfyJS.Say(`${user} unlocked a new ${randomCard.title} card!`);
+  }
+};
+
+ComfyJS.Init(channel, twitchAuth);
 
 // Listen the server
 const server = app.listen(

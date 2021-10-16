@@ -20,7 +20,7 @@ const authMiddleware = async (req, res, next) => {
   try {
     //Verify token
     // Leave the console.log for testing purpose
-    console.log(`process.env.JWT_SECRET`, process.env.JWT_SECRET);
+    // console.log(`process.env.JWT_SECRET`, process.env.JWT_SECRET);
 
     const secret = Buffer.from(process.env.JWT_SECRET, 'base64');
 
