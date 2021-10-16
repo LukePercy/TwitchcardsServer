@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const Viewer = require('../models/Viewer');
-const authMiddleware = require('../middleware/auth');
 
 // Get all viewers - testing purpose
 // router.get('/', async (req, res) => {
@@ -21,7 +20,7 @@ const authMiddleware = require('../middleware/auth');
 // });
 
 // Get a single viewer by ID
-router.get('/:id', authMiddleware, async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
