@@ -118,7 +118,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         holdingCards: [{
           cardId: randomCard.id,
           cardName: randomCard.title,
-          holdingAmount: 1}],
+          holdingAmount: updateAmount}],
       });
     }
   }
