@@ -94,7 +94,6 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         }
       }
       )
-      console.log(`targetedCard`, targetedCard);
       if (!targetedCard) {
         const updateHoldingCard = {
           cardId: randomCard.id,
@@ -102,7 +101,6 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
           holdingAmount: updateAmount,
         };
         holdingCards.push(updateHoldingCard);
-        console.log(`holdingCards`, holdingCards)
       } else {
         // If the card ID exists,
         // update the card holding amount
