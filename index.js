@@ -47,16 +47,12 @@ app.use('/api/viewers', viewer);
 const channel = process.env.TWITCH_USER;
 const clientId =  process.env.CLIENTID;
 const twitchAuth = process.env.TWITCH_OAUTH;
-const channelId = process.env.CHANNELID;
 
-app.get('/api/info', async (req, res) =>{
-  if (!channelId || !twitchAuth) return null;
+app.get('/api/authinfo', async (req, res) =>{
+  if (!twitchAuth) return null;
       return res.status(200).json({
       success: true,
-      data: {
-        channelId,
-        twitchAuth,
-      }
+      data: twitchAuth,
     });
 })
 
