@@ -47,6 +47,18 @@ app.use('/api/viewers', viewer);
 const channel = process.env.TWITCH_USER;
 const clientId =  process.env.CLIENTID;
 const twitchAuth = process.env.TWITCH_OAUTH;
+const channelId = process.env.CHANNELID;
+
+app.get('/api/info', async (req, res) =>{
+  if (!channelId || !twitchAuth) return null;
+      return res.status(200).json({
+      success: true,
+      data: {
+        channelId,
+        twitchAuth,
+      }
+    });
+})
 
   // On command API - to add the custom reward
   ComfyJS.onCommand = async (user, command, message, flags, extra) => {
