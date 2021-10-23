@@ -1,23 +1,23 @@
 const slides = [
     {
     id: 1, 
-    title: 'Miraqen',
+    title: 'DM',
     },
     {
     id: 2,
-    title: 'Byrem',
-    },
-    {
-    id: 3,
-    title: 'Morely',
-    },
-    {
-    id: 4,
     title: 'Bill',
     },
     {
+    id: 3,
+    title: 'Byrem',
+    },
+    {
+    id: 4,
+    title: 'Miraqen',
+    },
+    {
     id: 5,
-    title: 'DM',
+    title: 'Morely',
     }
 ]
 
