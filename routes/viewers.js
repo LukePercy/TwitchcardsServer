@@ -2,23 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Viewer = require('../models/Viewer');
 
-// Get all viewers - testing purpose
-// router.get('/', async (req, res) => {
-//   try {
-//     const viewers = await Viewer.find();
-
-//     return res.status(200).json({
-//       success: true,
-//       data: viewers,
-//     });
-//   } catch (error) {
-//     res.status(400).json({
-//       success: false,
-//       msg: error.message,
-//     });
-//   }
-// });
-
 // Get a single viewer by ID
 router.get('/:id', async (req, res) => {
   try {

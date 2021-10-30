@@ -5,6 +5,7 @@ const connectDB = require('./config/db-connect');
 const ComfyJS = require('comfy.js');
 const slides = require('./cardList/CardList');
 const Viewer = require('./models/Viewer');
+const authMiddleware = require('./middleware/auth')
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -46,9 +47,9 @@ app.use('/api/viewers', viewer);
 //comfy
 const channel = process.env.TWITCH_USER;
 const clientId =  process.env.CLIENTID;
-const twitchAuth = process.env.TWITCH_OAUTH;
+let twitchAuth = process.env.TWITCH_OAUTH;
 
-app.get('/api/authinfo', async (req, res) =>{
+app.get('/api/authinfo', authMiddleware, async (req, res) =>{
   if (!twitchAuth) return null;
       return res.status(200).json({
       success: true,
