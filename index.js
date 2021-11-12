@@ -132,7 +132,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
     }
   }
   if (response) {
-    ComfyJS.Say(`${user} unlocked a new ${randomCard.title} card!`);
+    ComfyJS.Say(`${user} unlocked a new ${randomCard.title} card! ${randomCard.emote}`);
   }
 };
 
