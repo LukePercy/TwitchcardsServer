@@ -108,6 +108,7 @@ passport.use(
         // The "created" param below indicates if this doc is newly created or not
         // May be useful in the sometime, so leave it here.
         function (err, channel, created) {
+          console.log('err', err);
           if (err) return done(err);
 
           return done(null, channel);
