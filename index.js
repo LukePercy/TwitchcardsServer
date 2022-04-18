@@ -1,11 +1,17 @@
 const express = require('express');
+const session = require('express-session');
+const helmet = require('helmet');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const connectDB = require('./config/db-connect');
+var passport = require('passport');
+var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+const fetch = require('node-fetch');
 const ComfyJS = require('comfy.js');
+
+const connectDB = require('./config/db-connect');
 const slides = require('./cardList/CardList');
 const Viewer = require('./models/Viewer');
-const authMiddleware = require('./middleware/auth')
+const authMiddleware = require('./middleware/auth');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -14,55 +20,137 @@ dotenv.config({ path: './config/config.env' });
 connectDB();
 
 // Route files
+const OAuthTwitch = require('./routes/oauth-twitch');
 const viewer = require('./routes/viewers');
 
 const PORT = process.env.PORT || 3003;
 
 const app = express();
+app.use(helmet());
+
+// ================= Passport Config ================= //
+// Define our constants, you will change these with your own
+const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
+const TWITCH_SECRET = process.env.TWITCH_SECRET;
+const SESSION_SECRET = process.env.SESSION_SECRET;
+const CALLBACK_URL = process.env.CALLBACK_URL; // You can run locally with - http://localhost:3000/auth/twitch/callback
+
+app.use(
+  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+);
+// app.use(express.static('public'));
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Override passport profile function to get user profile from Twitch API
+OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
+  console.log('accessToken user profile accessToken :>> ', accessToken);
+  var options = {
+    method: 'GET',
+    headers: {
+      'Client-ID': TWITCH_CLIENT_ID,
+      Accept: 'application/vnd.twitchtv.v5+json',
+      Authorization: 'Bearer ' + accessToken,
+    },
+  };
+
+  try {
+    const response = await fetch('https://api.twitch.tv/helix/users', options);
+    const body = await response.json();
+    console.log('body in await :>> ', body);
+    done(null, body);
+  } catch (error) {
+    console.log('Error Message:', error.message);
+    done(body);
+  }
+};
+
+passport.serializeUser(function (user, done) {
+  console.log('serializeUser user :>> ', user);
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  console.log('deserializeUser user :>> ', user);
+  done(null, user);
+});
+
+passport.use(
+  'twitch',
+  new OAuth2Strategy(
+    {
+      authorizationURL: 'https://id.twitch.tv/oauth2/authorize',
+      tokenURL: 'https://id.twitch.tv/oauth2/token',
+      clientID: TWITCH_CLIENT_ID,
+      clientSecret: TWITCH_SECRET,
+      callbackURL: CALLBACK_URL,
+      state: true,
+    },
+    function (accessToken, refreshToken, profile, done) {
+      profile.accessToken = accessToken;
+      profile.refreshToken = refreshToken;
+      console.log('profile :>> ', profile);
+      // Securely store user profile in your DB
+      //User.findOrCreate(..., function(err, user) {
+      //  done(err, user);
+      //});
+
+      done(null, profile);
+    }
+  )
+);
 
 // This allows us to access the body of POST/PUT
 // requests in our route handlers (as req.body)
 app.use(express.json());
 app.use(express.urlencoded());
 
-
 // Bypass the CORS error
 const corsOptions = {
   origin: (origin, callback) => {
     callback(null, true);
   },
-  methods: ["GET", "POST", "PUT"],
-  allowedHeaders: ["Access-Control-Allow-Origin", "Origin", "X-Requested-With", "Content-Type", "Accept", "Authorization"],
+  methods: ['GET', 'POST', 'PUT'],
+  allowedHeaders: [
+    'Access-Control-Allow-Origin',
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
+  ],
   // credentials: true
 };
 
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
-// app.use(cors());
-
 // Mount routes
 app.use('/api/viewers', viewer);
+app.use('/api', OAuthTwitch);
 
 //comfy
 const channel = process.env.TWITCH_USER;
-const clientId =  process.env.CLIENTID;
+const clientId = process.env.CLIENTID;
 let twitchAuth = process.env.TWITCH_OAUTH;
 
-app.get('/api/authinfo', authMiddleware, async (req, res) =>{
-  if (!twitchAuth) return null;
-      return res.status(200).json({
-      success: true,
-      data: twitchAuth,
-    });
-})
+// app.get('/api/authinfo', async (req, res) => {
+//   // app.get('/api/authinfo', authMiddleware, async (req, res) => {
+//   if (!twitchAuth) return null;
+//   return res.status(200).json({
+//     success: true,
+//     data: twitchAuth,
+//   });
+// });
 
-  // On command API - to add the custom reward
-  ComfyJS.onCommand = async (user, command, message, flags, extra) => {
+// ================= ComfyJS Config ================= //
+// On command API - to add the custom reward
+ComfyJS.onCommand = async (user, command, message, flags, extra) => {
   if (command === 'cardrewardcreate') {
     let customReward = await ComfyJS.CreateChannelReward(clientId, {
       title: 'Unlock Trading Card',
-      prompt: 'Unlock a random Getting Dicey Trading Card and check your collection panel below the stream',
+      prompt:
+        'Unlock a random Getting Dicey Trading Card and check your collection panel below the stream',
       cost: 250,
       is_enabled: true,
       background_color: '#00E5CB',
@@ -76,7 +164,7 @@ app.get('/api/authinfo', authMiddleware, async (req, res) =>{
       should_redemptions_skip_request_queue: true,
     });
     if (customReward) {
-    ComfyJS.Say(`Trading Card Reward Created!`);
+      ComfyJS.Say(`Trading Card Reward Created!`);
     }
   }
 };
@@ -94,15 +182,14 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
     if (viewer) {
       let targetedCardIndex = 0;
       const { holdingCards } = viewer;
-      
+
       // Find the card whose ID matched
       const targetedCard = holdingCards.find((card, index) => {
         if (card.cardId === randomCard.id) {
           targetedCardIndex = index;
           return card;
         }
-      }
-      )
+      });
       if (!targetedCard) {
         const updateHoldingCard = {
           cardId: randomCard.id,
@@ -114,20 +201,23 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         // If the card ID exists,
         // update the card holding amount
         holdingCards[targetedCardIndex].holdingAmount =
-        targetedCard.holdingAmount + updateAmount;
+          targetedCard.holdingAmount + updateAmount;
       }
       // update the updated time
       viewer.updatedAt = new Date().toISOString();
       // save the changes to db
-      response = viewer.save();      
+      response = viewer.save();
     } else {
       response = await Viewer.create({
         viewerId: userId,
         viewerName: username,
-        holdingCards: [{
-          cardId: randomCard.id,
-          cardName: randomCard.title,
-          holdingAmount: updateAmount}],
+        holdingCards: [
+          {
+            cardId: randomCard.id,
+            cardName: randomCard.title,
+            holdingAmount: updateAmount,
+          },
+        ],
       });
     }
   }
