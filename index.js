@@ -59,7 +59,6 @@ OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
   try {
     const response = await fetch('https://api.twitch.tv/helix/users', options);
     const body = await response.json();
-
     done(null, body);
   } catch (error) {
     console.log('Error Message:', error.message);
