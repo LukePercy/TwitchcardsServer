@@ -11,6 +11,7 @@ const ComfyJS = require('comfy.js');
 const connectDB = require('./config/db-connect');
 const slides = require('./cardList/CardList');
 const Viewer = require('./models/Viewer');
+const Channel = require('./models/Channel');
 const authMiddleware = require('./middleware/auth');
 
 // Load env vars
@@ -90,12 +91,32 @@ passport.use(
       profile.accessToken = accessToken;
       profile.refreshToken = refreshToken;
       console.log('profile :>> ', profile);
+      const { id, display_name, type } = profile.data[0];
+      // Define a "options" object and set an attrib 'upsert = true'
+      // then the document will be updated if it's already existed.
+      // Referring to this post: https://stackoverflow.com/questions/60393424/mongoose-unable-to-create-more-than-4-fields-using-findorcreate
+      const options = {
+        upsert: true,
+      };
       // Securely store user profile in your DB
-      //User.findOrCreate(..., function(err, user) {
-      //  done(err, user);
-      //});
+      Channel.findOrCreate(
+        { channelId: id },
+        {
+          displayName: display_name,
+          type,
+          accessToken,
+          refreshToken,
+        },
+        options,
+        // The "created" param below indicates if this doc is newly created or not
+        // May be useful in the sometime, so leave it here.
+        function (err, channel, created) {
+          console.log('err', err);
+          if (err) return done(err);
 
-      done(null, profile);
+          return done(null, channel);
+        }
+      );
     }
   )
 );
