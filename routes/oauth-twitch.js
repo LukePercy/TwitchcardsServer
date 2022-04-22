@@ -92,7 +92,6 @@ const validateAccessTokenCallback = async () => {
           accessToken: access_token,
           refreshToken: refresh_token,
         };
-
         // After the access token is refreshed,
         // then need to update the Channel.accessToken in DB.
         const updatedChannel = await Channel.findOneAndUpdate(filter, update);
