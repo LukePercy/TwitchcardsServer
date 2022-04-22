@@ -45,8 +45,7 @@ app.use(passport.session());
 
 // Override passport profile function to get user profile from Twitch API
 OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
-  console.log('accessToken user profile accessToken :>> ', accessToken);
-  var options = {
+  const options = {
     method: 'GET',
     headers: {
       'Client-ID': TWITCH_CLIENT_ID,
@@ -58,7 +57,7 @@ OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
   try {
     const response = await fetch('https://api.twitch.tv/helix/users', options);
     const body = await response.json();
-    console.log('body in await :>> ', body);
+
     done(null, body);
   } catch (error) {
     console.log('Error Message:', error.message);
@@ -67,12 +66,10 @@ OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
 };
 
 passport.serializeUser(function (user, done) {
-  console.log('serializeUser user :>> ', user);
   done(null, user);
 });
 
 passport.deserializeUser(function (user, done) {
-  console.log('deserializeUser user :>> ', user);
   done(null, user);
 });
 
@@ -111,7 +108,6 @@ passport.use(
         // The "created" param below indicates if this doc is newly created or not
         // May be useful in the sometime, so leave it here.
         function (err, channel, created) {
-          console.log('err', err);
           if (err) return done(err);
 
           return done(null, channel);
