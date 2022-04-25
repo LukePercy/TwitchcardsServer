@@ -1,12 +1,14 @@
 const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const CardSchema = new mongoose.Schema({
+const CardSchema = new Schema({
   cardId: Number,
   cardName: String,
   holdingAmount: Number,
 });
 
-const ViewerSchema = new mongoose.Schema({
+const ViewerSchema = new Schema({
+  _id: Schema.Types.ObjectId,
   viewerId: {
     type: String,
     required: true,
