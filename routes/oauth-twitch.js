@@ -21,7 +21,7 @@ const GRANTED_SCOPE =
 
 // Create the cron job callback function
 const validateAccessToken = async () => {
-  console.log('Running every 10 seconds');
+  console.log('Running every hour');
 
   let accessToken;
   let refreshToken;
@@ -94,9 +94,9 @@ const validateAccessToken = async () => {
           console.log('err :>> ', err);
         });
       }
-    } else if (refreshTokenResult.login) {
+    } else if (validatedResult.login) {
       // The expires_in value indicates how long, in second, the token is valid for.
-      const { expires_in } = refreshTokenResult;
+      const { expires_in } = validatedResult;
       // Convert seconds into hours
       const hours = expires_in / 3600;
       const hoursString = hours.toFixed();
@@ -111,7 +111,7 @@ const validateAccessToken = async () => {
 
 // Schedule a cron job - run this in very 10 seconds just for testing
 // need to change the interval (one hour) before pushing to prod.
-const job = nodeCron.schedule('*/10 * * * * *', validateAccessToken);
+const job = nodeCron.schedule('0 * * * *', validateAccessToken);
 
 job.start();
 
