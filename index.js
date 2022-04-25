@@ -22,7 +22,9 @@ connectDB();
 
 // Route files
 const OAuthTwitch = require('./routes/oauth-twitch');
-const viewer = require('./routes/viewers');
+const channels = require('./routes/channels');
+const viewers = require('./routes/viewers');
+const migration = require('./routes/migration');
 
 const PORT = process.env.PORT || 3003;
 
@@ -142,8 +144,11 @@ const corsOptions = {
 app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
+// This route is only used for viewers' db migration
+app.use('/api/migration', migration);
 // Mount routes
-app.use('/api/viewers', viewer);
+app.use('/api/channels', channels);
+app.use('/api/viewers', viewers);
 app.use('/api', OAuthTwitch);
 
 //comfy

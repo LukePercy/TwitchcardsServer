@@ -37,47 +37,47 @@ router.get('/:id', async (req, res) => {
 //     const viewer = await Viewer.findOne({ viewerId: req.params.id });
 
 //     if (!viewer) {
-      //   res.json({
-      //   success: false,
-      //   msg: 'The updating viewer not found.',
-      // });
-    //   console.log(`No viewer found`);
-    // }
+//   res.json({
+//   success: false,
+//   msg: 'The updating viewer not found.',
+// });
+//   console.log(`No viewer found`);
+// }
 
-    // let targetedCardIndex = 0;
-    // const { holdingCards } = viewer;
-    // Find the card whose ID matched
-    // const targetedCard = holdingCards.find((card, index) => {
-    //   if (card.cardId === cardId) {
-    //     targetedCardIndex = index;
-    //     return card;
-    //   }
-    // });
-    // If the card ID doesn't exist
-    // create a new card object
-    // if (!targetedCard) {
-    //   const updateHoldingCard = {
-    //     cardId,
-    //     cardName,
-    //     holdingAmount: updateAmount,
-    //   };
-    //   holdingCards.push(updateHoldingCard);
-    // } else {
-      // If the card ID exists,
-      // update the card holding amount
-    //   holdingCards[targetedCardIndex].holdingAmount =
-    //     targetedCard.holdingAmount + updateAmount;
-    // }
+// let targetedCardIndex = 0;
+// const { holdingCards } = viewer;
+// Find the card whose ID matched
+// const targetedCard = holdingCards.find((card, index) => {
+//   if (card.cardId === cardId) {
+//     targetedCardIndex = index;
+//     return card;
+//   }
+// });
+// If the card ID doesn't exist
+// create a new card object
+// if (!targetedCard) {
+//   const updateHoldingCard = {
+//     cardId,
+//     cardName,
+//     holdingAmount: updateAmount,
+//   };
+//   holdingCards.push(updateHoldingCard);
+// } else {
+// If the card ID exists,
+// update the card holding amount
+//   holdingCards[targetedCardIndex].holdingAmount =
+//     targetedCard.holdingAmount + updateAmount;
+// }
 
-    // update the updated time
-    // viewer.updatedAt = new Date().toISOString();
-    // save the changes to db
-    // viewer.save();
+// update the updated time
+// viewer.updatedAt = new Date().toISOString();
+// save the changes to db
+// viewer.save();
 
-    // return res.status(200).json({
-    //   success: true,
-    //   data: viewer,
-    // });
+// return res.status(200).json({
+//   success: true,
+//   data: viewer,
+// });
 //   } catch (error) {
 //     res.status(400).json({
 //       success: false,
@@ -87,6 +87,7 @@ router.get('/:id', async (req, res) => {
 // });
 
 // Create a new viewer
+// TODO: Need to add the newly created viewer._id to the channel.viewers[]
 // router.post('/', authMiddleware, async (req, res) => {
 //   try {
 //     const newViewer = await Viewer.create(req.body);
