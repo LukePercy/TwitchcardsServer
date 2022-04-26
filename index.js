@@ -13,6 +13,7 @@ const slides = require('./cardList/CardList');
 const Viewer = require('./models/Viewer');
 const Channel = require('./models/Channel');
 const authMiddleware = require('./middleware/auth');
+const getChannel = require('./util/getChannel');
 
 // Load env vars
 dotenv.config({ path: './config/config.env' });
@@ -41,7 +42,6 @@ const CALLBACK_URL = process.env.CALLBACK_URL; // You can run locally with - htt
 app.use(
   session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
 );
-// app.use(express.static('public'));
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -158,12 +158,8 @@ const channelId = process.env.CHANNEL_ID;
 let TwitchOAuthAccessToken;
 
 app.get('/api/authinfo', authMiddleware, async (req, res) => {
-  try {
-    const channelInfo = await Channel.findOne({ channelId });
-    TwitchOAuthAccessToken = channelInfo.accessToken;
-  } catch (error) {
-    throw new Error(`Error message: ${error.message}`);
-  }
+  const channelInfo = await getChannel(channelId);
+  TwitchOAuthAccessToken = channelInfo.accessToken;
 
   if (!TwitchOAuthAccessToken) return null;
   return res.status(200).json({
@@ -255,11 +251,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
 
           // TODO: Need to test this part locally
           // // Then get the newly created viewer's _id
-          // const channel = await Channel.findOne({ channelId: CHANNEL_ID });
-
-          // if (!channel) {
-          //   throw new Error(`The channel is NOT found!`)
-          // }
+          // const channel = await getChannel(CHANNEL_ID);
           // // and add it into the channel's Channel.viewers[].
           // channel.viewers.push(response._id);
           // // Finally, save it into db

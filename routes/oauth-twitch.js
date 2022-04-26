@@ -6,12 +6,14 @@ const nodeCron = require('node-cron');
 const open = require('open');
 
 const Channel = require('./../models/Channel');
+const getChannel = require('../util/getChannel');
 
 const router = express.Router();
 const validateUrl = 'https://id.twitch.tv/oauth2/validate';
 const refreshTokenUrl = 'https://id.twitch.tv/oauth2/token';
 const openNewTabUrl = 'http://localhost:3003/api/auth/twitch/refresh-config';
 
+// TODO: Find a way to pass a dynamic CHANNEL_ID
 // Hard-coded the Channel Id temporarily in env file
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
@@ -19,35 +21,23 @@ const TWITCH_SECRET = process.env.TWITCH_SECRET;
 const GRANTED_SCOPE =
   'channel:manage:redemptions channel:read:redemptions user:read:email chat:edit chat:read';
 
-// Create the cron job callback function
-const validateAccessToken = async () => {
-  console.log('Running every hour');
-
-  let accessToken;
-  let refreshToken;
-
-  try {
-    // Find the right Channel in db
-    const channel = await Channel.findOne({ channelId: CHANNEL_ID });
-
-    if (!channel) {
-      console.log('Channel Not Found!!');
-      return;
-    }
-
-    accessToken = channel.accessToken;
-    refreshToken = channel.refreshToken;
-  } catch (error) {
-    console.log(`Error: ${error.message}`);
-  }
-
+const validateAccessToken = async (token) => {
   const validateTokenOptions = {
     method: 'GET',
     headers: {
-      Authorization: `OAuth ${accessToken}`,
+      Authorization: `OAuth ${token}`,
     },
   };
 
+  try {
+    const response = await fetch(validateUrl, validateTokenOptions);
+    return await response.json();
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+  }
+};
+
+const refreshAccessToken = async (refreshToken) => {
   const refreshTokenOptions = {
     method: 'POST',
     headers: {
@@ -63,17 +53,36 @@ const validateAccessToken = async () => {
   };
 
   try {
+    const refreshTokenResponse = await fetch(
+      refreshTokenUrl,
+      refreshTokenOptions
+    );
+    return await refreshTokenResponse.json();
+  } catch (error) {
+    console.log(`Error: ${error.message}`);
+  }
+};
+
+// Create the cron job callback function
+const validateAccessTokenCallback = async () => {
+  console.log('Running every hour');
+
+  let accessToken;
+  let refreshToken;
+
+  // Find the right Channel in db
+  const channel = await getChannel(CHANNEL_ID);
+
+  accessToken = channel.accessToken;
+  refreshToken = channel.refreshToken;
+
+  try {
     // Check the Access Token Validation
-    const response = await fetch(validateUrl, validateTokenOptions);
-    const validatedResult = await response.json();
+    const validatedResult = await validateAccessToken(accessToken);
     // If the token is invalid
     if (validatedResult.status && validatedResult.status === 401) {
       // Use refresh token to query a new access token
-      const refreshTokenResponse = await fetch(
-        refreshTokenUrl,
-        refreshTokenOptions
-      );
-      const refreshTokenResult = await refreshTokenResponse.json();
+      const refreshTokenResult = await refreshAccessToken(refreshToken);
 
       if (refreshTokenResult.access_token && refreshTokenResult.refresh_token) {
         const { access_token, refresh_token } = refreshTokenResult;
@@ -83,12 +92,13 @@ const validateAccessToken = async () => {
           accessToken: access_token,
           refreshToken: refresh_token,
         };
+
         // After the access token is refreshed,
         // then need to update the Channel.accessToken in DB.
         const updatedChannel = await Channel.findOneAndUpdate(filter, update);
         console.log('updatedChannel :>> ', updatedChannel);
 
-        // Open a new tab in the default browser to show users
+        // Open a new tab in the default browser to show the info to users
         // Access Token Refreshed Message.
         await open(openNewTabUrl, (err) => {
           console.log('err :>> ', err);
@@ -110,15 +120,11 @@ const validateAccessToken = async () => {
 };
 
 // Schedule a cron job - run this in very 10 seconds just for testing
-// need to change the interval (one hour) before pushing to prod.
-const job = nodeCron.schedule('0 * * * *', validateAccessToken);
+const job = nodeCron.schedule('*/10 * * * * *', validateAccessTokenCallback);
+// Need to change the interval (one hour) before pushing to prod.
+// const job = nodeCron.schedule('0 * * * *', validateAccessTokenCallback);
 
 job.start();
-
-// TODO:
-// 1) Find a way to pass the ChannelID
-// 2) Tidy up the big chunk of validateAccessToken()
-// 3) Think about when to stop the cron job
 
 // Set route to start OAuth link, this is where you define scopes to request
 router.get(

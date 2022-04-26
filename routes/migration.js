@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const Channel = require('../models/Channel');
 const Viewer = require('../models/Viewer');
+const getChannel = require('../util/getChannel');
 
 // Migrate all viewers to the viewers property of the Channel's by ChannelId
 router.get('/:id', async (req, res) => {
@@ -9,7 +9,7 @@ router.get('/:id', async (req, res) => {
 
   try {
     // Find the Channel
-    const channel = await Channel.findOne({ channelId: req.params.id });
+    const channel = await getChannel(req.params.id);
 
     // Stringify the viewer Ids (being persisted as an ObjectId in MongoDB)
     const strigifiedViewerIdsArray = channel.viewers.map((channelViewer) =>
