@@ -89,7 +89,6 @@ passport.use(
     function (accessToken, refreshToken, profile, done) {
       profile.accessToken = accessToken;
       profile.refreshToken = refreshToken;
-      console.log('profile :>> ', profile);
       const { id, display_name, type } = profile.data[0];
       // Define a "options" object and set an attrib 'upsert = true'
       // then the document will be updated if it's already existed.
@@ -122,7 +121,7 @@ passport.use(
 // This allows us to access the body of POST/PUT
 // requests in our route handlers (as req.body)
 app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 
 // Bypass the CORS error
 const corsOptions = {
@@ -154,16 +153,24 @@ app.use('/api', OAuthTwitch);
 //comfy
 const channel = process.env.TWITCH_USER;
 const clientId = process.env.CLIENTID;
-let twitchAuth = process.env.TWITCH_OAUTH;
+// Get the Channel Id from .env for now
+const channelId = process.env.CHANNEL_ID;
+let TwitchOAuthAccessToken;
 
-// app.get('/api/authinfo', async (req, res) => {
-//   // app.get('/api/authinfo', authMiddleware, async (req, res) => {
-//   if (!twitchAuth) return null;
-//   return res.status(200).json({
-//     success: true,
-//     data: twitchAuth,
-//   });
-// });
+app.get('/api/authinfo', authMiddleware, async (req, res) => {
+  try {
+    const channelInfo = await Channel.findOne({ channelId });
+    TwitchOAuthAccessToken = channelInfo.accessToken;
+  } catch (error) {
+    throw new Error(`Error message: ${error.message}`);
+  }
+
+  if (!TwitchOAuthAccessToken) return null;
+  return res.status(200).json({
+    success: true,
+    data: TwitchOAuthAccessToken,
+  });
+});
 
 // ================= ComfyJS Config ================= //
 // On command API - to add the custom reward
@@ -198,49 +205,71 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
   let updateAmount = 1;
 
   if (rewardFulfilled) {
-    const viewer = await Viewer.findOne({ viewerId: userId });
-    // Check if the viewer has been stored in db already
-    // If true, then update the amount of holding cards for the viewer
-    if (viewer) {
-      let targetedCardIndex = 0;
-      const { holdingCards } = viewer;
+    try {
+      const viewer = await Viewer.findOne({ viewerId: userId });
+      // Check if the viewer has been stored in db already
+      // If true, then update the amount of holding cards for the viewer
+      if (viewer) {
+        let targetedCardIndex = 0;
+        const { holdingCards } = viewer;
 
-      // Find the card whose ID matched
-      const targetedCard = holdingCards.find((card, index) => {
-        if (card.cardId === randomCard.id) {
-          targetedCardIndex = index;
-          return card;
-        }
-      });
-      if (!targetedCard) {
-        const updateHoldingCard = {
-          cardId: randomCard.id,
-          cardName: randomCard.title,
-          holdingAmount: updateAmount,
-        };
-        holdingCards.push(updateHoldingCard);
-      } else {
-        // If the card ID exists,
-        // update the card holding amount
-        holdingCards[targetedCardIndex].holdingAmount =
-          targetedCard.holdingAmount + updateAmount;
-      }
-      // update the updated time
-      viewer.updatedAt = new Date().toISOString();
-      // save the changes to db
-      response = viewer.save();
-    } else {
-      response = await Viewer.create({
-        viewerId: userId,
-        viewerName: username,
-        holdingCards: [
-          {
+        // Find the card whose ID matched
+        const targetedCard = holdingCards.find((card, index) => {
+          if (card.cardId === randomCard.id) {
+            targetedCardIndex = index;
+            return card;
+          }
+        });
+        if (!targetedCard) {
+          const updateHoldingCard = {
             cardId: randomCard.id,
             cardName: randomCard.title,
             holdingAmount: updateAmount,
-          },
-        ],
-      });
+          };
+          holdingCards.push(updateHoldingCard);
+        } else {
+          // If the card ID exists,
+          // update the card holding amount
+          holdingCards[targetedCardIndex].holdingAmount =
+            targetedCard.holdingAmount + updateAmount;
+        }
+        // update the updated time
+        viewer.updatedAt = new Date().toISOString();
+        // save the changes to db
+        response = viewer.save();
+      } else {
+        try {
+          // If it's false, then create a new viewer and
+          // create the amount of holding cards for the viewer
+          response = await Viewer.create({
+            viewerId: userId,
+            viewerName: username,
+            holdingCards: [
+              {
+                cardId: randomCard.id,
+                cardName: randomCard.title,
+                holdingAmount: updateAmount,
+              },
+            ],
+          });
+
+          // TODO: Need to test this part locally
+          // // Then get the newly created viewer's _id
+          // const channel = await Channel.findOne({ channelId: CHANNEL_ID });
+
+          // if (!channel) {
+          //   throw new Error(`The channel is NOT found!`)
+          // }
+          // // and add it into the channel's Channel.viewers[].
+          // channel.viewers.push(response._id);
+          // // Finally, save it into db
+          // channel.save();
+        } catch (error) {
+          throw new Error(`Error Message: ${error.message}`);
+        }
+      }
+    } catch (error) {
+      throw new Error(`Error Message: ${error.message}`);
     }
   }
   if (response) {
@@ -248,7 +277,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
   }
 };
 
-ComfyJS.Init(channel, twitchAuth);
+ComfyJS.Init(channel, TwitchOAuthAccessToken);
 
 // Listen the server
 const server = app.listen(
