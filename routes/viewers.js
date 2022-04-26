@@ -87,7 +87,6 @@ router.get('/:id', async (req, res) => {
 // });
 
 // Create a new viewer
-// TODO: Need to add the newly created viewer._id to the channel.viewers[]
 // router.post('/', authMiddleware, async (req, res) => {
 //   try {
 //     const newViewer = await Viewer.create(req.body);
