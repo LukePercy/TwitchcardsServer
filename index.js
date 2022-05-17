@@ -250,12 +250,12 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
           });
 
           // TODO: Need to test this part locally
-          // // Then get the newly created viewer's _id
-          // const channel = await getChannel(CHANNEL_ID);
-          // // and add it into the channel's Channel.viewers[].
-          // channel.viewers.push(response._id);
-          // // Finally, save it into db
-          // channel.save();
+          // Then get the newly created viewer's _id
+          const channel = await getChannel(CHANNEL_ID);
+          // and add it into the channel's Channel.viewers[].
+          channel.viewers.push(response._id);
+          // Finally, save it into db
+          channel.save();
         } catch (error) {
           throw new Error(`Error Message: ${error.message}`);
         }
