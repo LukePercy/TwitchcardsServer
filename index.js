@@ -59,7 +59,6 @@ OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
   try {
     const response = await fetch('https://api.twitch.tv/helix/users', options);
     const body = await response.json();
-
     done(null, body);
   } catch (error) {
     console.log('Error Message:', error.message);
@@ -265,7 +264,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
     }
   }
   if (response) {
-    ComfyJS.Say(`${user} unlocked a new ${randomCard.title} card!`);
+    ComfyJS.Say(`${user} unlocked a new ${randomCard.title} card! ${randomCard.emote}`);
   }
 };
 
