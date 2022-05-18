@@ -10,11 +10,13 @@ const key = process.env.JWT_SECRET;
 const secret = Buffer.from(key, 'base64');
 
 const verifyTokenAndDecode = (header) => {
+  console.log('header', header)
   if (header.startsWith(bearerPrefix)) {
     try {
       const token = header.substring(bearerPrefix.length);
       return jwt.verify(token, secret, { algorithms: ['HS256'] });
     } catch (error) {
+      console.log('error in verfiy token >>>', error)
       throw new Error('Invalid Token');
     }
   }
