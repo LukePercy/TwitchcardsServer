@@ -120,9 +120,9 @@ const validateAccessTokenCallback = async () => {
 };
 
 // Schedule a cron job - run this in very 10 seconds just for testing
-const job = nodeCron.schedule('*/10 * * * * *', validateAccessTokenCallback);
+// const job = nodeCron.schedule('*/10 * * * * *', validateAccessTokenCallback);
 // Need to change the interval (one hour) before pushing to prod.
-// const job = nodeCron.schedule('0 * * * *', validateAccessTokenCallback);
+  const job = nodeCron.schedule('0 * * * *', validateAccessTokenCallback);
 
 job.start();
 
