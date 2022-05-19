@@ -8,10 +8,12 @@ const open = require('open');
 const Channel = require('./../models/Channel');
 const getChannel = require('../util/getChannel');
 
+const BASE_API_URL = process.env.BASE_API_URL;
+
 const router = express.Router();
 const validateUrl = 'https://id.twitch.tv/oauth2/validate';
 const refreshTokenUrl = 'https://id.twitch.tv/oauth2/token';
-const openNewTabUrl = 'http://localhost:3003/api/auth/twitch/refresh-config';
+const openNewTabUrl = `${BASE_API_URL}/api/auth/twitch/refresh-config`;
 
 // TODO: Find a way to pass a dynamic CHANNEL_ID
 // Hard-coded the Channel Id temporarily in env file
