@@ -10,7 +10,6 @@ const key = process.env.JWT_SECRET;
 const secret = Buffer.from(key, 'base64');
 
 const verifyTokenAndDecode = (header) => {
-  console.log('header', header)
   if (header.startsWith(bearerPrefix)) {
     try {
       const token = header.substring(bearerPrefix.length);
