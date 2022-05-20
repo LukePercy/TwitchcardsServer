@@ -160,7 +160,7 @@ app.use('/api', OAuthTwitch);
 
 //comfy
 const channel = process.env.TWITCH_USER;
-const clientId = process.env.CLIENT_ID;
+const clientId = process.env.TWITCH_CLIENT_ID;
 // Get the Channel Id from .env for now
 const channelId = process.env.CHANNEL_ID;
 let TwitchOAuthAccessToken;

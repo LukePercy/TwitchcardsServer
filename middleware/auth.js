@@ -15,6 +15,7 @@ const verifyTokenAndDecode = (header) => {
       const token = header.substring(bearerPrefix.length);
       return jwt.verify(token, secret, { algorithms: ['HS256'] });
     } catch (error) {
+      console.log('error in verfiy token >>>', error)
       throw new Error('Invalid Token');
     }
   }
