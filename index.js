@@ -1,5 +1,6 @@
 const express = require('express');
 const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
 const helmet = require('helmet');
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -40,7 +41,15 @@ const SESSION_SECRET = process.env.SESSION_SECRET;
 const CALLBACK_URL = process.env.CALLBACK_URL; // You can run locally with - http://localhost:3000/auth/twitch/callback
 
 app.use(
-  session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })
+  session({
+    cookie: { maxAge: 86400000 }, // count in milliseconds
+    store: new MemoryStore({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    }),
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
 );
 app.use(passport.initialize());
 app.use(passport.session());
@@ -264,7 +273,9 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
     }
   }
   if (response) {
-    ComfyJS.Say(`${user} unlocked a new ${randomCard.title} card! ${randomCard.emote}`);
+    ComfyJS.Say(
+      `${user} unlocked a new ${randomCard.title} card! ${randomCard.emote}`
+    );
   }
 };
 
