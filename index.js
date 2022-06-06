@@ -181,6 +181,8 @@ console.log("channelId", channelId);
 // ================= ComfyJS Config ================= //
 // On command API - to add the custom reward
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
+  console.log("first onCommand Works");
+  console.log("message", message);
   if (command === "cardrewardcreate") {
     let customReward = await ComfyJS.CreateChannelReward(clientId, {
       title: "Unlock Trading Card",
@@ -205,11 +207,12 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
 };
 
 ComfyJS.onReward = async (user, reward, cost, message, extra) => {
+  console.log("onReward fired!!!");
+  console.log("message", message);
   const { rewardFulfilled, userId, username } = extra;
   let randomCard = slides[Math.floor(Math.random() * slides.length)];
   let response = false;
   let updateAmount = 1;
-  console.log("extra", extra);
   if (rewardFulfilled) {
     try {
       const viewer = await Viewer.findOne({ viewerId: userId });
