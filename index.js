@@ -168,7 +168,6 @@ let TwitchOAuthAccessToken;
 app.get("/api/authinfo", authMiddleware, async (req, res) => {
   const channelInfo = await getChannel(channelId);
   let TwitchOAuthAccessToken = channelInfo.accessToken;
-
   if (!TwitchOAuthAccessToken) return null;
   return res.status(200).json({
     success: true,
