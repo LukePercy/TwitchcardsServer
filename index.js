@@ -165,7 +165,7 @@ const clientId = process.env.TWITCH_CLIENT_ID;
 const channelId = process.env.CHANNEL_ID;
 let TwitchOAuthAccessToken;
 
-app.get("/api/authinfo", async (req, res) => {
+app.get("/api/authinfo", authMiddleware, async (req, res) => {
   const channelInfo = await getChannel(channelId);
   let TwitchOAuthAccessToken = channelInfo.accessToken;
 
@@ -176,6 +176,7 @@ app.get("/api/authinfo", async (req, res) => {
   });
 });
 
+console.log("TwitchOAuthAccessToken", TwitchOAuthAccessToken);
 // ================= ComfyJS Config ================= //
 // On command API - to add the custom reward
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
