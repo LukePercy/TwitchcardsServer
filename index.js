@@ -1,32 +1,32 @@
-const express = require("express");
-const session = require("express-session");
-const MemoryStore = require("memorystore")(session);
-const helmet = require("helmet");
-const dotenv = require("dotenv");
-const cors = require("cors");
-var passport = require("passport");
-var OAuth2Strategy = require("passport-oauth").OAuth2Strategy;
-const fetch = require("node-fetch");
-const ComfyJS = require("comfy.js");
+const express = require('express');
+const session = require('express-session');
+const MemoryStore = require('memorystore')(session);
+const helmet = require('helmet');
+const dotenv = require('dotenv');
+const cors = require('cors');
+var passport = require('passport');
+var OAuth2Strategy = require('passport-oauth').OAuth2Strategy;
+const fetch = require('node-fetch');
+const ComfyJS = require('comfy.js');
 
-const connectDB = require("./config/db-connect");
-const slides = require("./cardList/CardList");
-const Viewer = require("./models/Viewer");
-const Channel = require("./models/Channel");
-const authMiddleware = require("./middleware/auth");
-const getChannel = require("./util/getChannel");
+const connectDB = require('./config/db-connect');
+const slides = require('./cardList/CardList');
+const Viewer = require('./models/Viewer');
+const Channel = require('./models/Channel');
+const authMiddleware = require('./middleware/auth');
+const getChannel = require('./util/getChannel');
 
 // Load env vars
-dotenv.config({ path: "./config/config.env" });
+dotenv.config({ path: './config/config.env' });
 
 // Connect to database;
 connectDB();
 
 // Route files
-const OAuthTwitch = require("./routes/oauth-twitch");
-const channels = require("./routes/channels");
-const viewers = require("./routes/viewers");
-const migration = require("./routes/migration");
+const OAuthTwitch = require('./routes/oauth-twitch');
+const channels = require('./routes/channels');
+const viewers = require('./routes/viewers');
+const migration = require('./routes/migration');
 
 const PORT = process.env.PORT || 3003;
 
@@ -57,20 +57,20 @@ app.use(passport.session());
 // Override passport profile function to get user profile from Twitch API
 OAuth2Strategy.prototype.userProfile = async function (accessToken, done) {
   const options = {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "Client-ID": TWITCH_CLIENT_ID,
-      Accept: "application/vnd.twitchtv.v5+json",
-      Authorization: "Bearer " + accessToken,
+      'Client-ID': TWITCH_CLIENT_ID,
+      Accept: 'application/vnd.twitchtv.v5+json',
+      Authorization: 'Bearer ' + accessToken,
     },
   };
 
   try {
-    const response = await fetch("https://api.twitch.tv/helix/users", options);
+    const response = await fetch('https://api.twitch.tv/helix/users', options);
     const body = await response.json();
     done(null, body);
   } catch (error) {
-    console.log("Error Message:", error.message);
+    console.log('Error Message:', error.message);
     done(body);
   }
 };
@@ -84,11 +84,11 @@ passport.deserializeUser(function (user, done) {
 });
 
 passport.use(
-  "twitch",
+  'twitch',
   new OAuth2Strategy(
     {
-      authorizationURL: "https://id.twitch.tv/oauth2/authorize",
-      tokenURL: "https://id.twitch.tv/oauth2/token",
+      authorizationURL: 'https://id.twitch.tv/oauth2/authorize',
+      tokenURL: 'https://id.twitch.tv/oauth2/token',
       clientID: TWITCH_CLIENT_ID,
       clientSecret: TWITCH_SECRET,
       callbackURL: CALLBACK_URL,
@@ -136,60 +136,80 @@ const corsOptions = {
   origin: (origin, callback) => {
     callback(null, true);
   },
-  methods: ["GET", "POST", "PUT"],
+  methods: ['GET', 'POST', 'PUT'],
   allowedHeaders: [
-    "Access-Control-Allow-Origin",
-    "Origin",
-    "X-Requested-With",
-    "Content-Type",
-    "Accept",
-    "Authorization",
+    'Access-Control-Allow-Origin',
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'Authorization',
   ],
   // credentials: true
 };
 
-app.options("*", cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(cors(corsOptions));
 
 // This route is only used for viewers' db migration
-app.use("/api/migration", migration);
+app.use('/api/migration', migration);
 // Mount routes
-app.use("/api/channels", channels);
-app.use("/api/viewers", viewers);
-app.use("/api", OAuthTwitch);
+app.use('/api/channels', channels);
+app.use('/api/viewers', viewers);
+app.use('/api', OAuthTwitch);
 
 //comfy
-const channel = process.env.TWITCH_USER;
+const twitchUser = process.env.TWITCH_USER;
 const clientId = process.env.TWITCH_CLIENT_ID;
 // Get the Channel Id from .env for now
 const channelId = process.env.CHANNEL_ID;
-let TwitchOAuthAccessToken;
+let TwitchOAuthAccessToken = '';
 
-app.get("/api/authinfo", authMiddleware, async (req, res) => {
+// Use IIFE (Immediately-Invoked Function Express) to
+// retrieve the OAuth Access Token and assign it to
+// TwitchOAuthAccessToken for initialising ComfyJS as well as
+// for sending back to the Frontend when '/api/authinfo' being hit
+(async () => {
   const channelInfo = await getChannel(channelId);
-  let TwitchOAuthAccessToken = channelInfo.accessToken;
-  if (!TwitchOAuthAccessToken) return null;
-  return res.status(200).json({
-    success: true,
-    data: TwitchOAuthAccessToken,
-  });
+  TwitchOAuthAccessToken = channelInfo.accessToken;
+
+  if (TwitchOAuthAccessToken) {
+    ComfyJS.Init(twitchUser, TwitchOAuthAccessToken);
+    console.log('ComfyJS initialised successfully');
+  } else {
+    throw new Error('OAuth Token not found, ComfyJS failed to initialise!!');
+  }
+})();
+
+app.get('/api/authinfo', authMiddleware, async (req, res) => {
+  if (TwitchOAuthAccessToken) {
+    return res.status(200).json({
+      success: true,
+      data: TwitchOAuthAccessToken,
+      message: null,
+    });
+  } else {
+    return res.status(404).json({
+      success: false,
+      data: null,
+      message: 'OAuth Access Token not found!',
+    });
+  }
 });
 
-console.log("TwitchOAuthAccessToken", TwitchOAuthAccessToken);
-console.log("channelId", channelId);
 // ================= ComfyJS Config ================= //
 // On command API - to add the custom reward
 ComfyJS.onCommand = async (user, command, message, flags, extra) => {
-  console.log("first onCommand Works");
-  console.log("message", message);
-  if (command === "cardrewardcreate") {
+  console.log('first onCommand Works');
+  console.log('message', message);
+  if (command === 'cardrewardcreate') {
     let customReward = await ComfyJS.CreateChannelReward(clientId, {
-      title: "Unlock Trading Card",
+      title: 'Unlock Trading Card',
       prompt:
-        "Unlock a random Getting Dicey Trading Card and check your collection panel below the stream",
+        'Unlock a random Getting Dicey Trading Card and check your collection panel below the stream',
       cost: 250,
       is_enabled: true,
-      background_color: "#00E5CB",
+      background_color: '#00E5CB',
       is_user_input_required: false,
       is_max_per_stream_enabled: false,
       max_per_stream: 0,
@@ -206,8 +226,8 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
 };
 
 ComfyJS.onReward = async (user, reward, cost, message, extra) => {
-  console.log("onReward fired!!!");
-  console.log("message", message);
+  console.log('onReward fired!!!');
+  console.log('message', message);
   const { rewardFulfilled, userId, username } = extra;
   let randomCard = slides[Math.floor(Math.random() * slides.length)];
   let response = false;
@@ -276,15 +296,13 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
       throw new Error(`Error Message: ${error.message}`);
     }
   }
-  console.log("response", response);
+  console.log('response', response);
   if (response) {
     ComfyJS.Say(
       `${user} unlocked a new ${randomCard.title} card! ${randomCard.emote}`
     );
   }
 };
-
-ComfyJS.Init(channel, TwitchOAuthAccessToken);
 
 // Listen the server
 const server = app.listen(
@@ -295,7 +313,7 @@ const server = app.listen(
 );
 
 // Handle unhandled promise rejections
-process.on("unhandledRejection", (error, promise) => {
+process.on('unhandledRejection', (error, promise) => {
   console.log(`[Error]: ${error.message}`);
 
   // Close the server and exit the process
