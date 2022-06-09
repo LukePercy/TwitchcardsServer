@@ -22,7 +22,6 @@ const verifyTokenAndDecode = (header) => {
 };
 
 const authMiddleware = async (req, res, next) => {
-  console.log("Headers >>>", req.headers);
   try {
     const payload = verifyTokenAndDecode(req.headers.authorization);
     req.user = await Viewer.findOne({ viewerId: payload.user_id });
