@@ -171,7 +171,6 @@ let TwitchOAuthAccessToken = "";
 // for sending back to the Frontend when '/api/authinfo' being hit
 (async () => {
   const channelInfo = await getChannel(channelId);
-  console.log("channelInfo", channelInfo);
   TwitchOAuthAccessToken = channelInfo.accessToken;
 
   if (TwitchOAuthAccessToken) {
