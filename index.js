@@ -185,7 +185,7 @@ app.get("/api/authinfo", authMiddleware, async (req, res) => {
   if (TwitchOAuthAccessToken) {
     return res.status(200).json({
       success: true,
-      data: TwitchOAuthAccessToken,
+      data: { token: TwitchOAuthAccessToken, channelId },
       message: null,
     });
   } else {
