@@ -260,7 +260,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         // update the updated time
         viewer.updatedAt = new Date().toISOString();
         // save the changes to db
-        response = viewer.save();
+        response = await viewer.save();
       } else {
         try {
           // If it's false, then create a new viewer and
