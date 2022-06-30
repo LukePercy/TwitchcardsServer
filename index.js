@@ -205,7 +205,7 @@ ComfyJS.onCommand = async (user, command, message, flags, extra) => {
       title: "Unlock Trading Card",
       prompt:
         "Unlock a random Getting Dicey Trading Card and check your collection panel below the stream",
-      cost: 250,
+      cost: 1,
       is_enabled: true,
       background_color: "#00E5CB",
       is_user_input_required: false,
