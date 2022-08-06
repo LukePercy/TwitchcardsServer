@@ -161,7 +161,7 @@ app.use("/api", OAuthTwitch);
 //comfy
 const twitchUser = process.env.TWITCH_USER;
 const clientId = process.env.TWITCH_CLIENT_ID;
-// Get the Channel Id from .env for now
+// Get the Channel Id from db for now
 const channelId = process.env.CHANNEL_ID;
 let TwitchOAuthAccessToken = "";
 
@@ -292,7 +292,6 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
       throw new Error(`Error Message: ${error.message}`);
     }
   }
-  console.log("response", response);
   if (response) {
     ComfyJS.Say(
       `${user} unlocked a new ${randomCard.title} card! ${randomCard.emote}`
