@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
+const findOrCreate = require("mongoose-findorcreate");
 
 const CardSchema = new Schema({
   cardId: Number,
@@ -28,4 +29,6 @@ const ViewerSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model('Viewer', ViewerSchema);
+ViewerSchema.plugin(findOrCreate);
+
+module.exports = mongoose.model("Viewer", ViewerSchema);
