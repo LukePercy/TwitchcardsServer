@@ -15,7 +15,8 @@ const Viewer = require("./models/Viewer");
 const Channel = require("./models/Channel");
 const authMiddleware = require("./middleware/auth");
 const getChannel = require("./util/getChannel");
-
+const mongoose = require("mongoose");
+const { Types } = mongoose;
 // Load env vars
 dotenv.config({ path: "./config/config.env" });
 
