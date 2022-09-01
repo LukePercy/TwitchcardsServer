@@ -265,7 +265,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         try {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
-          const responseFromCreateNewViewer = Viewer.findOrCreate({
+          const responseFromCreateNewViewer = Viewer.findOrCreate(
             viewerId: userId,
             viewerName: username,
             holdingCards: [
@@ -275,7 +275,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
                 holdingAmount: updateAmount,
               },
             ],
-          });
+          );
           response = await responseFromCreateNewViewer.json();
           // TODO: Need to test this part locally
           // Then get the newly created viewer's _id
