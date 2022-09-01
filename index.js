@@ -39,7 +39,8 @@ app.use(helmet());
 const TWITCH_CLIENT_ID = process.env.TWITCH_CLIENT_ID;
 const TWITCH_SECRET = process.env.TWITCH_SECRET;
 const SESSION_SECRET = process.env.SESSION_SECRET;
-const CALLBACK_URL = process.env.CALLBACK_URL; // You can run locally with - http://localhost:3000/auth/twitch/callback
+const CALLBACK_URL = process.env.CALLBACK_URL;
+const CHANNEL_ID = process.env.CHANNEL_ID;
 
 app.use(
   session({
