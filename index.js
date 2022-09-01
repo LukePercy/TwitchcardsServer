@@ -267,6 +267,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         // save the changes to db
         response = await viewer.save();
       } else {
+        console.log("why does this not trigger?");
         try {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
