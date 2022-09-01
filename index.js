@@ -266,6 +266,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
           const responseFromCreateNewViewer = await Viewer.findOrCreate({
+            _id: channelId,
             viewerId: userId,
             viewerName: username,
             holdingCards: [
