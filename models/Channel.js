@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const findOrCreate = require('mongoose-findorcreate');
+const findOrCreate = require("mongoose-findorcreate");
 
 const ChannelSchema = new Schema({
   channelId: String,
@@ -8,7 +8,7 @@ const ChannelSchema = new Schema({
   type: String,
   accessToken: String,
   refreshToken: String,
-  viewers: [{ type: Schema.Types.ObjectId, ref: 'Viewer' }],
+  viewers: [{ type: Schema.Types.ObjectId, ref: "Viewer" }],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -17,4 +17,4 @@ const ChannelSchema = new Schema({
 
 ChannelSchema.plugin(findOrCreate);
 
-module.exports = mongoose.model('Channel', ChannelSchema);
+module.exports = mongoose.model("Channel", ChannelSchema);
