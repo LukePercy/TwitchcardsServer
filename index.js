@@ -276,7 +276,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
               },
             ],
           });
-          response = await responseFromCreateNewViewer.json();
+          response = responseFromCreateNewViewer.json();
           // TODO: Need to test this part locally
           // Then get the newly created viewer's _id
           const dbchannelId = await getChannel(CHANNEL_ID);
