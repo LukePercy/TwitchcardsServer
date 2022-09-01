@@ -237,9 +237,6 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
       const viewer = await Viewer.findOne({ viewerId: userId });
       // Check if the viewer has been stored in db already
       // If true, then update the amount of holding cards for the viewer
-      console.log("viewer", viewer);
-      console.log("userId", userId);
-      console.log("username", username);
       if (viewer) {
         let targetedCardIndex = 0;
         const { holdingCards } = viewer;
@@ -269,11 +266,9 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         // save the changes to db
         response = await viewer.save();
       } else {
-        console.log("why does this not trigger?");
         try {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
-          console.log("I have no idea why this isnt here");
           const response = await Viewer.create({
             _id: new Types.ObjectId(),
             viewerId: userId,
@@ -286,13 +281,11 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
               },
             ],
           });
-          console.log("responseFromCreateNewViewer", response);
-          console.log("typeof ", typeof response);
+          console.log("response", response);
+          console.log("response._id", response._id);
           // TODO: Need to test this part locally
           // Then get the newly created viewer's _id
           const dbchannelId = await getChannel(CHANNEL_ID);
-          console.log("dbchannelId", dbchannelId);
-          console.log("CHANNEL_ID", CHANNEL_ID);
           // and add it into the channel's Channel.viewers[].
           dbchannelId.viewers.push(response._id);
           // Finally, save it into db
