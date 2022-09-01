@@ -228,6 +228,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
   let randomCard = slides[Math.floor(Math.random() * slides.length)];
   let response = false;
   let updateAmount = 1;
+
   console.log("rewardFulfilled", rewardFulfilled);
 
   if (rewardFulfilled) {
@@ -271,6 +272,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         try {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
+          console.log("I have no idea why this isnt here");
           const responseFromCreateNewViewer = await Viewer.create({
             viewerId: userId,
             viewerName: username,
