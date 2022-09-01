@@ -274,7 +274,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
           console.log("I have no idea why this isnt here");
-          const responseFromCreateNewViewer = await Viewer.create({
+          const response = await Viewer.create({
             _id: new Types.ObjectId(),
             viewerId: userId,
             viewerName: username,
@@ -286,12 +286,8 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
               },
             ],
           });
-          console.log(
-            "responseFromCreateNewViewer",
-            responseFromCreateNewViewer
-          );
-          response = await responseFromCreateNewViewer.json();
-          console.log("response", response);
+          console.log("responseFromCreateNewViewer", response);
+          console.log("typeof ", typeof response);
           // TODO: Need to test this part locally
           // Then get the newly created viewer's _id
           const dbchannelId = await getChannel(CHANNEL_ID);
