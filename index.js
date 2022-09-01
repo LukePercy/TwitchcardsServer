@@ -274,6 +274,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
           // create the amount of holding cards for the viewer
           console.log("I have no idea why this isnt here");
           const responseFromCreateNewViewer = await Viewer.create({
+            _id: new Types.ObjectId(),
             viewerId: userId,
             viewerName: username,
             holdingCards: [
@@ -292,13 +293,13 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
           console.log("response", response);
           // TODO: Need to test this part locally
           // Then get the newly created viewer's _id
-          // const dbchannelId = await getChannel(CHANNEL_ID);
-          // console.log("dbchannelId", dbchannelId);
-          // console.log("CHANNEL_ID", CHANNEL_ID);
-          // // and add it into the channel's Channel.viewers[].
-          // dbchannelId.viewers.push(response._id);
-          // // Finally, save it into db
-          // dbchannelId.save();
+          const dbchannelId = await getChannel(CHANNEL_ID);
+          console.log("dbchannelId", dbchannelId);
+          console.log("CHANNEL_ID", CHANNEL_ID);
+          // and add it into the channel's Channel.viewers[].
+          dbchannelId.viewers.push(response._id);
+          // Finally, save it into db
+          dbchannelId.save();
         } catch (error) {
           throw new Error(`Error Message: ${error.message}`);
         }
