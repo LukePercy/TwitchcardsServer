@@ -228,11 +228,16 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
   let randomCard = slides[Math.floor(Math.random() * slides.length)];
   let response = false;
   let updateAmount = 1;
+  console.log("rewardFulfilled", rewardFulfilled);
+
   if (rewardFulfilled) {
     try {
       const viewer = await Viewer.findOne({ viewerId: userId });
       // Check if the viewer has been stored in db already
       // If true, then update the amount of holding cards for the viewer
+      console.log("viewer", viewer);
+      console.log("userId", userId);
+      console.log("username", username);
       if (viewer) {
         let targetedCardIndex = 0;
         const { holdingCards } = viewer;
@@ -265,7 +270,7 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
         try {
           // If it's false, then create a new viewer and
           // create the amount of holding cards for the viewer
-          const responseFromCreateNewViewer = await Viewer.findOrCreate({
+          const responseFromCreateNewViewer = await Viewer.Create({
             viewerId: userId,
             viewerName: username,
             holdingCards: [
@@ -276,10 +281,17 @@ ComfyJS.onReward = async (user, reward, cost, message, extra) => {
               },
             ],
           });
+          console.log(
+            "responseFromCreateNewViewer",
+            responseFromCreateNewViewer
+          );
           response = await responseFromCreateNewViewer.json();
+          console.log("response", response);
           // TODO: Need to test this part locally
           // Then get the newly created viewer's _id
           const dbchannelId = await getChannel(CHANNEL_ID);
+          console.log("dbchannelId", dbchannelId);
+          console.log("CHANNEL_ID", CHANNEL_ID);
           // and add it into the channel's Channel.viewers[].
           dbchannelId.viewers.push(response._id);
           // Finally, save it into db
