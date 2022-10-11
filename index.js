@@ -49,8 +49,8 @@ app.use(
       checkPeriod: 86400000, // prune expired entries every 24h
     }),
     secret: SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
   })
 );
 app.use(passport.initialize());
